@@ -20,9 +20,9 @@ Rules that must not be broken:
 
 ## Web version (Vercel)
 `public/index.html` + `api/*.js` + `lib/*.js`. Arjun logs in with `DASHBOARD_PASSWORD`, uploads CVs in
-**Upload CVs** (text is extracted in the browser), and `api/screen.js` runs two Claude calls per CV:
+**Upload CVs** (text is extracted in the browser), and `api/screen.js` runs two Gemini calls per CV:
 `extract()` pulls contacts and returns redacted text, then `score()` sees only that redacted text.
 `lib/rubric.js` mirrors `rank.py`. State lives in a private Vercel Blob store (append-only events).
-Env vars: `DASHBOARD_PASSWORD`, `ANTHROPIC_API_KEY`, `BLOB_READ_WRITE_TOKEN` (from the linked store),
+Env vars: `DASHBOARD_PASSWORD`, `GEMINI_API_KEY` (optional `GEMINI_MODEL`, default gemini-2.5-flash), `BLOB_READ_WRITE_TOKEN` (from the linked store),
 `RESEND_API_KEY`, `ARJUN_EMAIL`, `REDIRECT_ALL_TO` (demo), optional `EMAIL_FROM`, `EMAIL_REPLY_TO`.
 The public repo holds code only — never commit `applications/`, `private/`, `work/` or `.env`.

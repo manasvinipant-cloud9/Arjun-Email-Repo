@@ -1,7 +1,7 @@
 // POST {filename, text, role_hint} -> extract + redact -> score -> store. One CV per request.
 import { createHash } from 'node:crypto';
 import { authorized, json, saveCandidate, candidateExists } from '../lib/store.js';
-import { extract, scrub, score } from '../lib/claude.js';
+import { extract, scrub, score } from '../lib/llm.js';
 import { computeScores } from '../lib/rubric.js';
 
 export async function POST(request) {

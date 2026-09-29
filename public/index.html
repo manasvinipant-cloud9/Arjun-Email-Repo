@@ -134,7 +134,7 @@ ul.tight{margin:4px 0;padding-left:18px} ul.tight li{margin:3px 0}
 
 <section id="uploadView" class="upload hidden">
   <h2 style="margin:4px 0 4px;font-size:20px">Upload CVs</h2>
-  <div class="muted">PDF, DOCX or TXT. Each CV is stripped of personal details, then scored by Claude against the PM/SPM rubric and the success pattern from Kargo's past hires. Takes about a minute per CV; several run at once.</div>
+  <div class="muted">PDF, DOCX or TXT. Each CV is stripped of personal details, then scored by Gemini against the PM/SPM rubric and the success pattern from Kargo's past hires. Takes about a minute per CV; several run at once.</div>
   <div class="opts">
     <label>Role applied for:
       <select id="roleSel">
@@ -207,7 +207,7 @@ function show(view){
 document.querySelectorAll('.tabs-top button').forEach(b => b.onclick = () => show(b.dataset.view));
 
 /* ---------- upload ---------- */
-const Q = []; let running = 0; const CONCURRENCY = 4;
+const Q = []; let running = 0; const CONCURRENCY = 2; // Gemini free tier is rate-limited
 async function fileText(f){
   const ext = f.name.split('.').pop().toLowerCase();
   if(ext === 'pdf'){
