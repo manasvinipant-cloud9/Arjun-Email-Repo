@@ -1,0 +1,13 @@
+{
+  "outputDirectory": "public",
+  "functions": {
+    "api/screen.js": { "maxDuration": 300, "includeFiles": "{reference/**,pipeline/SCORING_GUIDE.md}" },
+    "api/send.js": { "maxDuration": 300 }
+  },
+  "headers": [
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Robots-Tag", "value": "noindex" },
+      { "key": "Referrer-Policy", "value": "no-referrer" }
+    ] }
+  ]
+}

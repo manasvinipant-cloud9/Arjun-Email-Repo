@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Kargo Hiring</title>
+<style>
+
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1b1a; --muted:#6b6a66; --line:#e4e2dc; --soft:#efede8;
+  --accent:#1f5eff; --accent-ink:#fff;
+  --adv:#127a4a; --adv-bg:#e3f4ea; --flag:#9a6200; --flag-bg:#fbf0d9; --pass:#8a8986; --pass-bg:#efeeeb;
+  --inv:#127a4a; --rej:#b3261e; --rej-bg:#fbe7e5;
+  --radius:10px; --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141413; --panel:#1d1d1c; --ink:#ecebe7; --muted:#9b9a95; --line:#2f2f2d; --soft:#252524;
+  --accent:#6b93ff; --adv:#5fd39a; --adv-bg:#16321f; --flag:#f0b44a; --flag-bg:#3a2c10; --pass:#8f8e89; --pass-bg:#262625;
+  --inv:#5fd39a; --rej:#ff8a80; --rej-bg:#3a1b19;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px}
+button:hover{border-color:var(--muted)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+header h1{font-size:17px;margin:0 12px 0 0;letter-spacing:-.01em}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em}
+.badge.dry{background:var(--flag-bg);color:var(--flag)} .badge.live{background:var(--adv-bg);color:var(--adv)}
+.stats{display:flex;gap:18px;margin-left:auto;color:var(--muted);font-size:13px}
+.stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+.bar{display:flex;gap:8px;align-items:center;padding:12px 20px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;border-radius:0;padding:6px 12px;background:transparent}
+.seg button.on{background:var(--ink);color:var(--bg)}
+main{display:grid;grid-template-columns:minmax(360px,440px) 1fr;gap:16px;padding:0 20px 40px}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+.list{overflow:hidden}
+.plot{padding:12px 14px 4px;border-bottom:1px solid var(--line)}
+.plot svg{width:100%;height:auto;display:block}
+.row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;align-items:center}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--soft)} .row.sel{background:var(--soft);box-shadow:inset 3px 0 0 var(--accent)}
+.rank{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600;text-align:right}
+.nm{font-weight:600} .hl{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.nums{display:flex;gap:6px;align-items:center;font-variant-numeric:tabular-nums;font-size:12px}
+.num{min-width:34px;text-align:center;padding:2px 5px;border-radius:6px;background:var(--soft)}
+.chip{font-size:11px;font-weight:600;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.chip.advance{background:var(--adv-bg);color:var(--adv)} .chip.advance_flag{background:var(--flag-bg);color:var(--flag)} .chip.pass{background:var(--pass-bg);color:var(--pass)}
+.dec{font-size:11px;font-weight:700}
+.dec.invite{color:var(--inv)} .dec.rejection{color:var(--rej)} .dec.sent{color:var(--muted)}
+.detail{padding:20px 24px;min-height:60vh}
+.detail h2{margin:0;font-size:22px;letter-spacing:-.015em}
+.meta{color:var(--muted);font-size:13px;margin-top:2px}
+.scorehead{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.big{padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius)}
+.big .v{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums} .big .v small{font-size:14px;color:var(--muted);font-weight:500}
+.big .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.read{padding:10px 14px;border-radius:var(--radius);margin-bottom:14px}
+.read.advance{background:var(--adv-bg)} .read.advance_flag{background:var(--flag-bg)} .read.pass{background:var(--pass-bg)}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:22px 0 8px}
+.crit{display:grid;grid-template-columns:190px 70px 1fr;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
+@media (max-width:640px){.crit{grid-template-columns:1fr 70px}.crit .ev{grid-column:1/-1}}
+.dots{display:flex;gap:3px;align-items:center}.dots i{width:9px;height:9px;border-radius:2px;background:var(--line)}.dots i.f{background:var(--ink)}
+.ev{color:var(--muted)}
+.w{color:var(--muted);font-size:11px}
+ul.tight{margin:4px 0;padding-left:18px} ul.tight li{margin:3px 0}
+.q{padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin:6px 0}
+.q .why{color:var(--muted);font-size:12.5px;margin-top:3px}
+.flags{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.flags div{font-size:12.5px;padding:5px 9px;border-left:3px solid var(--flag);background:var(--soft);border-radius:4px}
+.decide{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0 4px;padding:12px;border:1px dashed var(--line);border-radius:var(--radius)}
+.decide button.inv.on{background:var(--inv);border-color:var(--inv);color:#fff}
+.decide button.rej.on{background:var(--rej);border-color:var(--rej);color:#fff}
+.rec{font-size:11px;color:var(--muted);margin-left:2px}
+.email input,.email textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.email textarea{min-height:230px;font-size:13.5px;line-height:1.5;resize:vertical}
+.email .tabs{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+.muted{color:var(--muted)}
+.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal.open{display:flex}
+.modal .box{background:var(--panel);border-radius:14px;max-width:560px;width:100%;max-height:80vh;overflow:auto;padding:22px}
+.modal h4{margin:0 0 6px;font-size:18px}
+.modal table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.modal td{padding:5px 4px;border-top:1px solid var(--line)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:13px;display:none;z-index:30}
+
+.login{max-width:360px;margin:14vh auto;padding:28px}
+.login input{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);margin:12px 0}
+.tabs-top{display:flex;gap:4px;margin-right:8px}
+.tabs-top button{border:0;background:transparent;font-weight:600;color:var(--muted)}
+.tabs-top button.on{color:var(--ink);background:var(--soft)}
+.upload{max-width:880px;margin:0 auto;padding:20px}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:44px 20px;text-align:center;background:var(--panel);cursor:pointer}
+.drop.over{border-color:var(--accent);background:var(--soft)}
+.drop b{font-size:16px}
+.opts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.opts select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.q-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);font-size:13px;align-items:center}
+.q-row:last-child{border-bottom:0}
+.st{font-size:12px;font-weight:600}
+.st.wait{color:var(--muted)} .st.run{color:var(--accent)} .st.ok{color:var(--adv)} .st.err{color:var(--rej)} .st.dup{color:var(--flag)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="loginView" class="card login hidden">
+  <h1 style="font-size:19px;margin:0">Kargo · hiring</h1>
+  <div class="muted" style="margin-top:4px">Private dashboard. Enter the access password.</div>
+  <form id="loginForm"><input id="pw" type="password" autocomplete="current-password" placeholder="Password" required>
+  <button class="primary" style="width:100%">Open dashboard</button></form>
+  <div id="loginErr" style="color:var(--rej);margin-top:8px;font-size:13px"></div>
+</div>
+
+<div id="appView" class="hidden">
+<header>
+  <h1>Kargo · PM / SPM hiring</h1>
+  <div class="tabs-top"><button data-view="upload">Upload CVs</button><button data-view="dash" class="on">Dashboard</button></div>
+  <span id="mode" class="badge dry">dry run</span>
+  <div class="stats">
+    <span><b id="sScreened">0</b> screened</span>
+    <span><b id="sPending">0</b> awaiting you</span>
+    <span><b id="sReady">0</b> ready to send</span>
+    <span><b id="sSent">0</b> sent</span>
+  </div>
+  <button id="reviewBtn" title="Emails Arjun a summary with the top candidates and a link back here">Email Arjun the review</button>
+  <button id="sendBtn" class="primary">Send approved emails</button>
+</header>
+
+<section id="uploadView" class="upload hidden">
+  <h2 style="margin:4px 0 4px;font-size:20px">Upload CVs</h2>
+  <div class="muted">PDF, DOCX or TXT. Each CV is stripped of personal details, then scored by Claude against the PM/SPM rubric and the success pattern from Kargo's past hires. Takes about a minute per CV; several run at once.</div>
+  <div class="opts">
+    <label>Role applied for:
+      <select id="roleSel">
+        <option value="auto">Detect from file name (pm_ / spm_) or CV</option>
+        <option value="PM">Product Manager</option>
+        <option value="SPM">Senior Product Manager</option>
+      </select>
+    </label>
+  </div>
+  <label class="drop" id="drop">
+    <input id="fileIn" type="file" multiple accept=".pdf,.docx,.txt" class="hidden">
+    <b>Drop CVs here</b><div class="muted" style="margin-top:4px">or click to choose files</div>
+  </label>
+  <div id="qSummary" class="muted" style="margin:14px 0 6px"></div>
+  <div id="queue" class="card hidden"></div>
+</section>
+
+<section id="dashView">
+<div class="bar">
+  <div class="seg" id="roleSeg"><button data-v="SPM" class="on">Senior PM</button><button data-v="PM">PM</button></div>
+  <div class="seg" id="filtSeg">
+    <button data-v="all" class="on">All</button><button data-v="advance">Advance</button>
+    <button data-v="advance_flag">Advance + flag</button><button data-v="pass">Pass</button><button data-v="undecided">Undecided</button>
+  </div>
+  <span class="muted" style="font-size:12.5px">Ranked by 2×2 tier, then Success Profile, then Role Fit. The two scores are never averaged.</span>
+</div>
+<main>
+  <section class="card list"><div class="plot" id="plot"></div><div id="rows"></div></section>
+  <section class="card detail" id="detail"><div class="empty">No candidates yet. Upload CVs to start.</div></section>
+</main>
+</section>
+</div>
+
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const S = {data:null, role:'SPM', filt:'all', sel:null, draftTab:null, key:null};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const REC = {advance:'Advance', advance_flag:'Advance + flag', pass:'Pass'};
+const ROLE = {PM:'Product Manager', SPM:'Senior Product Manager'};
+const store = { get(){ try{return sessionStorage.getItem('kargo-key')}catch{return null} }, set(v){ try{v?sessionStorage.setItem('kargo-key',v):sessionStorage.removeItem('kargo-key')}catch{} } };
+
+async function api(path, body){
+  const r = await fetch(path, {method: body ? 'POST' : 'GET', headers:{'Content-Type':'application/json','x-kargo-key':S.key||''}, body: body ? JSON.stringify(body) : undefined});
+  const j = await r.json().catch(() => ({error:`HTTP ${r.status}`}));
+  if(r.status === 401){ logout(); throw new Error('Wrong password'); }
+  if(!r.ok) throw new Error(j.error || r.status);
+  return j;
+}
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',2800); }
+
+/* ---------- login ---------- */
+function logout(){ S.key=null; store.set(null); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+$('loginForm').onsubmit = async e => {
+  e.preventDefault(); S.key = $('pw').value; $('loginErr').textContent='';
+  try { await load(); store.set(S.key); $('loginView').classList.add('hidden'); $('appView').classList.remove('hidden'); }
+  catch(err){ $('loginErr').textContent = err.message; }
+};
+
+/* ---------- views ---------- */
+function show(view){
+  document.querySelectorAll('.tabs-top button').forEach(b => b.classList.toggle('on', b.dataset.view===view));
+  $('uploadView').classList.toggle('hidden', view!=='upload'); $('dashView').classList.toggle('hidden', view!=='dash');
+}
+document.querySelectorAll('.tabs-top button').forEach(b => b.onclick = () => show(b.dataset.view));
+
+/* ---------- upload ---------- */
+const Q = []; let running = 0; const CONCURRENCY = 4;
+async function fileText(f){
+  const ext = f.name.split('.').pop().toLowerCase();
+  if(ext === 'pdf'){
+    const pdf = await pdfjsLib.getDocument({data: await f.arrayBuffer()}).promise;
+    const pages = [];
+    for(let i=1;i<=pdf.numPages;i++){
+      const p = await pdf.getPage(i); const tc = await p.getTextContent();
+      let line = '', out = [], lastY = null;
+      for(const it of tc.items){ const y = it.transform[5]; if(lastY!==null && Math.abs(y-lastY)>2){ out.push(line); line=''; } line += it.str + (it.hasEOL?'\n':''); lastY = y; }
+      out.push(line); pages.push(out.join('\n'));
+      // Emails often live only in mailto: links
+      for(const a of await p.getAnnotations()) if(a.url && a.url.startsWith('mailto:')) pages.push(a.url.slice(7));
+    }
+    return pages.join('\n');
+  }
+  if(ext === 'docx') return (await mammoth.extractRawText({arrayBuffer: await f.arrayBuffer()})).value;
+  return await f.text();
+}
+function roleFor(name){
+  const sel = $('roleSel').value; if(sel !== 'auto') return sel;
+  const n = name.toLowerCase(); return n.startsWith('spm_') ? 'SPM' : n.startsWith('pm_') ? 'PM' : 'UNSPECIFIED';
+}
+function addFiles(files){
+  for(const f of files){ if(!/\.(pdf|docx|txt)$/i.test(f.name)) continue; Q.push({file:f, name:f.name, role:roleFor(f.name), st:'wait', msg:'Queued'}); }
+  renderQueue(); pump();
+}
+function renderQueue(){
+  $('queue').classList.toggle('hidden', !Q.length);
+  const c = k => Q.filter(q=>q.st===k).length;
+  $('qSummary').textContent = Q.length ? `${c('ok')} screened · ${c('run')} in progress · ${c('wait')} queued · ${c('dup')} already screened · ${c('err')} failed` : '';
+  $('queue').innerHTML = Q.map(q => `<div class="q-row"><div>${esc(q.name)} <span class="muted">· ${q.role==='UNSPECIFIED'?'role: auto':q.role}</span></div><div class="st ${q.st}">${esc(q.msg)}</div></div>`).join('');
+}
+async function pump(){
+  while(running < CONCURRENCY){
+    const q = Q.find(x => x.st==='wait'); if(!q) break;
+    running++; q.st='run'; q.msg='Reading…'; renderQueue();
+    (async () => {
+      try {
+        const text = await fileText(q.file);
+        q.msg = 'Redacting & scoring…'; renderQueue();
+        const r = await api('/api/screen', {filename:q.name, text, role_hint:q.role});
+        if(r.status==='duplicate'){ q.st='dup'; q.msg='Already screened'; }
+        else { q.st='ok'; q.msg=`${r.role} · ${REC[r.recommendation]}`; }
+      } catch(e){ q.st='err'; q.msg = e.message; }
+      running--; renderQueue(); pump();
+      if(!Q.some(x=>x.st==='wait'||x.st==='run')){ await load(); toast('Screening finished. Dashboard updated.'); }
+    })();
+  }
+}
+$('fileIn').onchange = e => { addFiles(e.target.files); e.target.value=''; };
+const drop = $('drop');
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); addFiles(e.dataTransfer.files); };
+
+/* ---------- dashboard ---------- */
+async function load(){
+  S.data = await api('/api/state');
+  const C = S.data.candidates;
+  $('mode').textContent = S.data.mode === 'live' ? (S.data.config.redirect_all_to ? 'live · test redirect' : 'live · Resend') : 'dry run';
+  $('mode').className = 'badge ' + (S.data.mode === 'live' ? 'live' : 'dry');
+  $('sScreened').textContent = C.length;
+  $('sPending').textContent = C.filter(c=>!c.decision && !c.sent).length;
+  const ready = C.filter(c=>c.decision && !c.sent && c.email).length;
+  $('sReady').textContent = ready; $('sSent').textContent = C.filter(c=>c.sent).length;
+  $('sendBtn').textContent = ready ? `Send ${ready} approved email${ready>1?'s':''}` : 'Send approved emails';
+  $('sendBtn').disabled = !ready;
+  if(!S.sel || !C.find(c=>c.id===S.sel)){ const f = C.find(c=>c.role_applied===S.role); S.sel = f && f.id; }
+  render();
+}
+function visible(){
+  return S.data.candidates.filter(c => c.role_applied===S.role && (S.filt==='all' || (S.filt==='undecided' ? !c.decision && !c.sent : c.recommendation===S.filt)));
+}
+function statusLabel(c){
+  if(c.sent) return `<span class="dec sent">${c.sent.status==='dry_run'?'DRY-RUN SENT':'SENT'}</span>`;
+  if(c.decision==='invite') return '<span class="dec invite">INVITE</span>';
+  if(c.decision==='rejection') return '<span class="dec rejection">DECLINE</span>';
+  return '';
+}
+function render(){
+  const V = visible();
+  $('rows').innerHTML = V.length ? V.map(c => `
+    <div class="row ${c.id===S.sel?'sel':''}" data-id="${c.id}">
+      <div class="rank">${c.rank}</div>
+      <div style="min-width:0"><div class="nm">${esc(c.name)} ${statusLabel(c)}</div><div class="hl">${esc(c.headline)}</div></div>
+      <div style="text-align:right">
+        <div class="nums" title="Success Profile · Role Fit"><span class="num">${c.success_profile_score}</span><span class="num">${c.role_fit_score}</span></div>
+        <div style="margin-top:4px"><span class="chip ${c.recommendation}">${REC[c.recommendation]}</span></div>
+      </div>
+    </div>`).join('') : '<div class="empty">No candidates in this view</div>';
+  document.querySelectorAll('.row').forEach(r => r.onclick = () => { S.sel=r.dataset.id; S.draftTab=null; render(); });
+  renderPlot(); renderDetail();
+}
+function renderPlot(){
+  const G = S.data.candidates.filter(c=>c.role_applied===S.role);
+  const W=400,H=210,p=26, x=v=>p+(v-1)/9*(W-p-8), y=v=>H-p-(v-1)/9*(H-p-8), hx=x(6), hy=y(6);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Role fit vs success profile">
+    <rect x="${hx}" y="8" width="${W-8-hx}" height="${hy-8}" fill="var(--adv-bg)"/>
+    <rect x="${p}" y="8" width="${hx-p}" height="${hy-8}" fill="var(--flag-bg)" opacity=".6"/>
+    <rect x="${hx}" y="${hy}" width="${W-8-hx}" height="${H-p-hy}" fill="var(--flag-bg)" opacity=".6"/>
+    <line x1="${p}" y1="${H-p}" x2="${W-8}" y2="${H-p}" stroke="var(--line)"/><line x1="${p}" y1="8" x2="${p}" y2="${H-p}" stroke="var(--line)"/>
+    <text x="${W-8}" y="${H-8}" text-anchor="end" font-size="10" fill="var(--muted)">Role fit →</text>
+    <text x="10" y="12" font-size="10" fill="var(--muted)" transform="rotate(-90 10 12)" text-anchor="end">Success profile →</text>`;
+  for(const c of G){ const on = c.id===S.sel;
+    s += `<circle data-id="${c.id}" cx="${x(c.role_fit_score)}" cy="${y(c.success_profile_score)}" r="${on?7:4.5}" fill="${on?'var(--accent)':'var(--ink)'}" fill-opacity="${on?1:.55}" stroke="var(--panel)" stroke-width="1.5" style="cursor:pointer"><title>${esc(c.name)}: SP ${c.success_profile_score} · RF ${c.role_fit_score}</title></circle>`; }
+  $('plot').innerHTML = s + '</svg>';
+  $('plot').querySelectorAll('circle').forEach(el => el.onclick = () => { S.sel=el.dataset.id; S.draftTab=null; render(); });
+}
+const dots = n => '<span class="dots">'+[1,2,3,4,5].map(i=>`<i class="${i<=n?'f':''}"></i>`).join('')+'</span>';
+const crit = rows => rows.map(r => `<div class="crit"><div>${esc(r.label)} <span class="w">${Math.round(r.weight*100)}%</span></div><div>${dots(r.score)}</div><div class="ev">${esc(r.evidence)}</div></div>`).join('');
+
+function renderDetail(){
+  const c = S.data.candidates.find(x=>x.id===S.sel);
+  if(!c || c.role_applied!==S.role){ $('detail').innerHTML = `<div class="empty">${S.data.candidates.length?'Select a candidate':'No candidates yet. Upload CVs to start.'}</div>`; return; }
+  const b = c.interview_brief || {}, recKind = c.recommendation==='pass' ? 'rejection' : 'invite';
+  const tab = S.draftTab || c.decision || recKind, d = c.drafts[tab], locked = !!c.sent;
+  const total = S.data.candidates.filter(x=>x.role_applied===c.role_applied).length;
+  $('detail').innerHTML = `
+    <h2>${esc(c.name)}</h2>
+    <div class="meta">${ROLE[c.role_applied]} · #${c.rank} of ${total} · ${esc(c.years_pm_experience)} yrs PM · ${esc(c.location_signal)} · ${c.email?esc(c.email):'<b style="color:var(--rej)">no email</b>'} · ${esc(c.source_file)}</div>
+    <div style="margin-top:8px">${esc(c.profile_summary)}</div>
+    <div class="scorehead">
+      <div class="big"><div class="k">Kargo success profile</div><div class="v">${c.success_profile_score}<small> / 10</small></div><div class="muted" style="font-size:12px">Pattern from Arjun's best past hires</div></div>
+      <div class="big"><div class="k">Role fit · ${c.role_applied}</div><div class="v">${c.role_fit_score}<small> / 10</small></div><div class="muted" style="font-size:12px">Weighted against the JD</div></div>
+    </div>
+    <div class="read ${c.recommendation}"><b>${REC[c.recommendation]}.</b> ${esc(c.combined_read)}</div>
+    ${c.flags?.length ? `<div class="flags">${c.flags.map(f=>`<div>${esc(f)}</div>`).join('')}</div>`:''}
+    <div class="decide">
+      <b style="margin-right:4px">Your call:</b>
+      <button class="inv ${c.decision==='invite'?'on':''}" data-dec="invite" ${locked?'disabled':''}>Invite to interview</button>
+      <button class="rej ${c.decision==='rejection'?'on':''}" data-dec="rejection" ${locked?'disabled':''}>Decline</button>
+      ${c.decision && !locked ? '<button data-dec="">Undo</button>' : ''}
+      <span class="rec">System suggests: ${recKind==='invite'?'invite':'decline'}</span>
+      ${locked ? `<span class="muted" style="margin-left:auto">${c.sent.status==='dry_run'?'Dry-run':'Sent'} ${esc(c.sent.at)} → ${esc(c.sent.to)}</span>` : ''}
+    </div>
+    <h3>Interview brief</h3>
+    <div><b>Why ranked here.</b> ${esc(b.why_ranked_here)}</div>
+    <div style="margin-top:10px"><b>What to probe</b></div>
+    ${(b.probe_questions||[]).map(q=>`<div class="q">${esc(q.question)}<div class="why">${esc(q.why)}</div></div>`).join('')}
+    <div style="margin-top:10px"><b>Risk to test.</b> ${esc(b.risk_to_test)}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px">
+      <div><b>Strengths</b><ul class="tight">${(c.strengths||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>
+      <div><b>Gaps</b><ul class="tight">${(c.gaps||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>
+    </div>
+    <h3>Email draft</h3>
+    <div class="email">
+      <div class="tabs">
+        <div class="seg"><button data-tab="invite" class="${tab==='invite'?'on':''}">Invite</button><button data-tab="rejection" class="${tab==='rejection'?'on':''}">Decline</button></div>
+        <span class="muted" style="font-size:12px">${c.decision ? (c.decision===tab ? 'This is the email that will be sent' : 'Not the selected decision (preview only)') : 'Pick a decision above to queue an email'}</span>
+      </div>
+      <input id="subj" value="${esc(d.subject)}" ${locked?'disabled':''}>
+      <textarea id="body" style="margin-top:6px" ${locked?'disabled':''}>${esc(d.body)}</textarea>
+      ${locked?'':'<div style="margin-top:6px;display:flex;gap:8px"><button id="saveDraft">Save edits</button><button id="removeBtn" style="margin-left:auto;color:var(--rej)">Remove candidate</button></div>'}
+    </div>
+    <h3>Kargo success profile · evidence</h3>${crit(c.success_profile)}
+    <h3>Role fit · ${c.role_applied} · evidence</h3>${crit(c.role_fit)}`;
+  $('detail').querySelectorAll('[data-dec]').forEach(el => el.onclick = async () => {
+    try { await api('/api/decide', {id:c.id, decision: el.dataset.dec || null}); S.draftTab = el.dataset.dec || null; await load(); } catch(e){ toast(e.message); }
+  });
+  $('detail').querySelectorAll('[data-tab]').forEach(el => el.onclick = () => { S.draftTab = el.dataset.tab; renderDetail(); });
+  const sv = $('saveDraft'); if(sv) sv.onclick = async () => { try { await api('/api/edit', {id:c.id, kind:tab, subject:$('subj').value, body:$('body').value}); toast('Draft saved'); await load(); } catch(e){ toast(e.message); } };
+  const rm = $('removeBtn'); if(rm) rm.onclick = async () => { if(!confirm(`Remove ${c.name} from the dashboard? Their scores and drafts are deleted.`)) return; try { await api('/api/remove', {id:c.id}); S.sel=null; await load(); toast('Removed'); } catch(e){ toast(e.message); } };
+}
+function segment(id, key){
+  $(id).querySelectorAll('button').forEach(b => b.onclick = () => {
+    $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S[key] = b.dataset.v;
+    if(key==='role'){ const f = S.data.candidates.find(c=>c.role_applied===S.role); S.sel = f && f.id; S.draftTab=null; }
+    render();
+  });
+}
+function modal(html){ $('modalBox').innerHTML = html; $('modal').classList.add('open'); }
+function closeModal(){ $('modal').classList.remove('open'); }
+$('modal').onclick = e => { if(e.target.id==='modal') closeModal(); };
+
+$('sendBtn').onclick = () => {
+  const Qs = S.data.candidates.filter(c=>c.decision && !c.sent && c.email);
+  const noEmail = S.data.candidates.filter(c=>c.decision && !c.sent && !c.email);
+  const inv = Qs.filter(c=>c.decision==='invite').length, rej = Qs.length - inv;
+  const live = S.data.mode==='live', redir = S.data.config.redirect_all_to;
+  modal(`<h4>Send ${Qs.length} email${Qs.length>1?'s':''}?</h4>
+    <div class="muted">${inv} interview invite${inv!==1?'s':''} · ${rej} decline${rej!==1?'s':''}. ${live ? (redir ? `<b>Test mode:</b> every email is redirected to ${esc(redir)}.` : '<b>These go to candidates now</b> via Resend.') : 'Dry run: no Resend key is configured, so nothing is delivered.'}</div>
+    <table>${Qs.map(c=>`<tr><td>${esc(c.name)}</td><td class="muted">${esc(c.email)}</td><td><span class="dec ${c.decision}">${c.decision==='invite'?'INVITE':'DECLINE'}</span></td></tr>`).join('')}</table>
+    ${noEmail.length?`<div class="muted" style="font-size:12.5px">${noEmail.length} decided candidate(s) have no email in their CV and will be skipped.</div>`:''}
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button onclick="closeModal()">Cancel</button><button class="primary" id="confirmSend">Send ${Qs.length}</button></div>`);
+  $('confirmSend').onclick = async () => {
+    $('confirmSend').disabled = true; $('confirmSend').textContent = 'Sending…';
+    try {
+      const r = await api('/api/send', {confirm:true});
+      const bad = r.results.filter(x=>x.status==='error');
+      modal(`<h4>${r.results.length - bad.length} of ${r.results.length} ${S.data.mode==='live'?'sent':'recorded (dry run)'}</h4>
+        <table>${r.results.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.status)}</td><td class="muted">${esc(x.error||x.resend_id||x.to)}</td></tr>`).join('')}</table>
+        <div style="text-align:right"><button class="primary" onclick="closeModal()">Done</button></div>`);
+    } catch(e){ modal(`<h4>Send failed</h4><div class="muted">${esc(e.message)}</div><div style="text-align:right;margin-top:12px"><button onclick="closeModal()">Close</button></div>`); }
+    await load();
+  };
+};
+$('reviewBtn').onclick = async () => {
+  try { const r = await api('/api/review', {}); toast(r.status==='sent' ? `Review sent to ${r.to}` : r.status==='dry_run' ? `Dry run: review would go to ${r.to}` : `Error: ${r.error}`); }
+  catch(e){ toast(e.message); }
+};
+segment('roleSeg','role'); segment('filtSeg','filt');
+
+(async () => {
+  S.key = store.get();
+  if(S.key){ try { await load(); $('appView').classList.remove('hidden'); return; } catch {} }
+  logout();
+})();
+</script>
+</body>
+</html>
